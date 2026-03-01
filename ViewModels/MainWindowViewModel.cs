@@ -10,6 +10,8 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using pomodero.Models;
+using pomodero.Services;
 
 namespace pomodero.ViewModels;
 
@@ -18,21 +20,24 @@ public partial class MainWindowViewModel : ViewModelBase
     private DispatcherTimer _timer;
     private TimeSpan _remainingTime;
     private TimerMode _currentMode = TimerMode.Work;
+    private readonly DatabaseService _db;
+    private UserSettings _settings;
+    private DailyRecord _todayRecord;
 
     [ObservableProperty]
-    private int _workDuration = 25;
+    private int _workDuration;
 
     [ObservableProperty]
-    private int _shortBreakDuration = 5;
+    private int _shortBreakDuration;
 
     [ObservableProperty]
-    private int _longBreakDuration = 15;
+    private int _longBreakDuration;
 
     [ObservableProperty]
-    private int _targetSessions = 8;
+    private int _targetSessions;
 
     [ObservableProperty]
-    private int _sessionsCompletedToday = 0;
+    private int _sessionsCompletedToday;
 
     [ObservableProperty]
     private int _sessionsInCurrentCycle = 0;
@@ -53,10 +58,31 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _statusColor = "#FF5F5F";
 
     [ObservableProperty]
-    private bool _isDarkMode = true;
+    private bool _isDarkMode;
 
     public MainWindowViewModel()
     {
+        _db = new DatabaseService();
+        _settings = _db.GetSettings();
+        _todayRecord = _db.GetTodayRecord();
+
+        // Load settings from DB
+        _workDuration = _settings.WorkDuration;
+        _shortBreakDuration = _settings.ShortBreakDuration;
+        _longBreakDuration = _settings.LongBreakDuration;
+        _targetSessions = _settings.TargetSessions;
+        _isDarkMode = _settings.IsDarkMode;
+        _sessionsCompletedToday = _todayRecord.CompletedSessions;
+
+        // Apply theme on start
+        Dispatcher.UIThread.Post(() => {
+            var app = Application.Current;
+            if (app != null)
+            {
+                app.RequestedThemeVariant = IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+            }
+        });
+
         _timer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1)
@@ -87,6 +113,10 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             SessionsCompletedToday++;
             SessionsInCurrentCycle++;
+
+            // Save to DB
+            _todayRecord.CompletedSessions = SessionsCompletedToday;
+            _db.SaveTodayRecord(_todayRecord);
 
             if (SessionsInCurrentCycle >= 4)
             {
@@ -173,11 +203,41 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             app.RequestedThemeVariant = IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
         }
+        SaveSettings();
     }
 
-    partial void OnWorkDurationChanged(int value) => ResetTimerIfStopped();
-    partial void OnShortBreakDurationChanged(int value) => ResetTimerIfStopped();
-    partial void OnLongBreakDurationChanged(int value) => ResetTimerIfStopped();
+    partial void OnWorkDurationChanged(int value)
+    {
+        SaveSettings();
+        ResetTimerIfStopped();
+    }
+
+    partial void OnShortBreakDurationChanged(int value)
+    {
+        SaveSettings();
+        ResetTimerIfStopped();
+    }
+
+    partial void OnLongBreakDurationChanged(int value)
+    {
+        SaveSettings();
+        ResetTimerIfStopped();
+    }
+
+    partial void OnTargetSessionsChanged(int value)
+    {
+        SaveSettings();
+    }
+
+    private void SaveSettings()
+    {
+        _settings.WorkDuration = WorkDuration;
+        _settings.ShortBreakDuration = ShortBreakDuration;
+        _settings.LongBreakDuration = LongBreakDuration;
+        _settings.TargetSessions = TargetSessions;
+        _settings.IsDarkMode = IsDarkMode;
+        _db.SaveSettings(_settings);
+    }
 
     private void ResetTimerIfStopped()
     {
@@ -220,20 +280,25 @@ public class ThemeTextConverter : IValueConverter
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
 }
 
-public class SessionDotsConverter : IMultiValueConverter
+public class SessionGroupsConverter : IMultiValueConverter
 {
-    public static readonly SessionDotsConverter Instance = new();
+    public static readonly SessionGroupsConverter Instance = new();
 
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
         if (values.Count >= 2 && values[0] is int completed && values[1] is int target)
         {
-            var brushes = new List<IBrush>();
-            for (int i = 0; i < target; i++)
+            var groups = new List<List<IBrush>>();
+            for (int i = 0; i < target; i += 4)
             {
-                brushes.Add(i < completed ? Brush.Parse("#FF5F5F") : Brush.Parse("#80808080"));
+                var group = new List<IBrush>();
+                for (int j = i; j < Math.Min(i + 4, target); j++)
+                {
+                    group.Add(j < completed ? Brush.Parse("#FF5F5F") : Brush.Parse("#80808080"));
+                }
+                groups.Add(group);
             }
-            return brushes;
+            return groups;
         }
         return null;
     }

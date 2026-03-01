@@ -41,22 +41,33 @@
                            FontWeight="ExtraBold"
                            Foreground="{Binding StatusColor}"/>
 
-                <!-- Session Dots (Daily Progress) -->
+                <!-- Session Dots (Daily Progress Grouped by 4) -->
                 <ItemsControl HorizontalAlignment="Center">
                     <ItemsControl.ItemsSource>
-                        <MultiBinding Converter="{x:Static vm:SessionDotsConverter.Instance}">
+                        <MultiBinding Converter="{x:Static vm:SessionGroupsConverter.Instance}">
                             <Binding Path="SessionsCompletedToday"/>
                             <Binding Path="TargetSessions"/>
                         </MultiBinding>
                     </ItemsControl.ItemsSource>
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal" MaxWidth="300" HorizontalAlignment="Center"/>
+                            <WrapPanel Orientation="Horizontal" MaxWidth="350" HorizontalAlignment="Center"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Ellipse Width="14" Height="14" Fill="{Binding}" Margin="4"/>
+                            <ItemsControl ItemsSource="{Binding}" Margin="10,5">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="6"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Ellipse Width="14" Height="14" Fill="{Binding}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
