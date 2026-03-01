@@ -1,6 +1,12 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
+using Avalonia;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,8 +17,25 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private DispatcherTimer _timer;
     private TimeSpan _remainingTime;
-    private int _workSessionsCompleted = 0;
     private TimerMode _currentMode = TimerMode.Work;
+
+    [ObservableProperty]
+    private int _workDuration = 25;
+
+    [ObservableProperty]
+    private int _shortBreakDuration = 5;
+
+    [ObservableProperty]
+    private int _longBreakDuration = 15;
+
+    [ObservableProperty]
+    private int _targetSessions = 8;
+
+    [ObservableProperty]
+    private int _sessionsCompletedToday = 0;
+
+    [ObservableProperty]
+    private int _sessionsInCurrentCycle = 0;
 
     [ObservableProperty]
     private string _timeString = "25:00";
@@ -27,7 +50,10 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _isRunning = false;
 
     [ObservableProperty]
-    private string _statusColor = "#FF5F5F"; // Red for work
+    private string _statusColor = "#FF5F5F";
+
+    [ObservableProperty]
+    private bool _isDarkMode = true;
 
     public MainWindowViewModel()
     {
@@ -59,29 +85,31 @@ public partial class MainWindowViewModel : ViewModelBase
 
         if (_currentMode == TimerMode.Work)
         {
-            _workSessionsCompleted++;
-            if (_workSessionsCompleted % 4 == 0)
+            SessionsCompletedToday++;
+            SessionsInCurrentCycle++;
+
+            if (SessionsInCurrentCycle >= 4)
             {
                 _currentMode = TimerMode.LongBreak;
                 StatusText = "Long Break";
-                StatusColor = "#5F5FFF"; // Blue
+                StatusColor = "#5F5FFF";
+                SessionsInCurrentCycle = 0;
             }
             else
             {
                 _currentMode = TimerMode.ShortBreak;
                 StatusText = "Short Break";
-                StatusColor = "#5FFF5F"; // Green
+                StatusColor = "#5FFF5F";
             }
         }
         else
         {
             _currentMode = TimerMode.Work;
             StatusText = "Work Session";
-            StatusColor = "#FF5F5F"; // Red
+            StatusColor = "#FF5F5F";
         }
 
         ResetTimer();
-        // Automatic transition: Start the next timer automatically
         StartStop();
     }
 
@@ -89,17 +117,17 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _remainingTime = _currentMode switch
         {
-            TimerMode.Work => TimeSpan.FromMinutes(25),
-            TimerMode.ShortBreak => TimeSpan.FromMinutes(5),
-            TimerMode.LongBreak => TimeSpan.FromMinutes(15),
-            _ => TimeSpan.FromMinutes(25)
+            TimerMode.Work => TimeSpan.FromMinutes(WorkDuration),
+            TimerMode.ShortBreak => TimeSpan.FromMinutes(ShortBreakDuration),
+            TimerMode.LongBreak => TimeSpan.FromMinutes(LongBreakDuration),
+            _ => TimeSpan.FromMinutes(WorkDuration)
         };
         UpdateTimeString();
     }
 
     private void UpdateTimeString()
     {
-        TimeString = $"{_remainingTime.Minutes:D2}:{_remainingTime.Seconds:D2}";
+        TimeString = $"{(int)_remainingTime.TotalMinutes:D2}:{_remainingTime.Seconds:D2}";
     }
 
     [RelayCommand]
@@ -113,6 +141,10 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         else
         {
+            if (_remainingTime.TotalSeconds <= 0)
+            {
+                ResetTimer();
+            }
             _timer.Start();
             IsRunning = true;
             StartStopButtonText = "Pause";
@@ -126,10 +158,33 @@ public partial class MainWindowViewModel : ViewModelBase
         IsRunning = false;
         StartStopButtonText = "Start";
         _currentMode = TimerMode.Work;
-        _workSessionsCompleted = 0;
+        SessionsInCurrentCycle = 0;
         StatusText = "Work Session";
-        StatusColor = "#FF5F5F"; // Red
+        StatusColor = "#FF5F5F";
         ResetTimer();
+    }
+
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        IsDarkMode = !IsDarkMode;
+        var app = Application.Current;
+        if (app != null)
+        {
+            app.RequestedThemeVariant = IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+        }
+    }
+
+    partial void OnWorkDurationChanged(int value) => ResetTimerIfStopped();
+    partial void OnShortBreakDurationChanged(int value) => ResetTimerIfStopped();
+    partial void OnLongBreakDurationChanged(int value) => ResetTimerIfStopped();
+
+    private void ResetTimerIfStopped()
+    {
+        if (!IsRunning)
+        {
+            ResetTimer();
+        }
     }
 
     private void PlayAlertSound()
@@ -142,15 +197,48 @@ public partial class MainWindowViewModel : ViewModelBase
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // Simple beep for Windows
                 Console.Beep();
             }
         }
-        catch
-        {
-            // Ignore sound errors
-        }
+        catch { }
     }
+}
+
+public class ThemeTextConverter : IValueConverter
+{
+    public static readonly ThemeTextConverter Instance = new();
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is bool isDark)
+        {
+            return isDark ? "Dark Mode" : "Light Mode";
+        }
+        return "Unknown";
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
+}
+
+public class SessionDotsConverter : IValueConverter
+{
+    public static readonly SessionDotsConverter Instance = new();
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is int completed)
+        {
+            var brushes = new List<IBrush>();
+            for (int i = 0; i < 4; i++)
+            {
+                brushes.Add(i < completed ? Brush.Parse("#FF5F5F") : Brush.Parse("#80808080"));
+            }
+            return brushes;
+        }
+        return null;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
 }
 
 public enum TimerMode
