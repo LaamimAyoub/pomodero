@@ -3,8 +3,7 @@
         xmlns:vm="using:pomodero.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="650"
-        Width="450" Height="650"
+        mc:Ignorable="d"
         x:Class="pomodero.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
@@ -28,70 +27,45 @@
         <TabControl Margin="10">
             <!-- Timer Tab -->
             <TabItem Header="Timer" FontSize="16">
-            <ScrollViewer>
-                <StackPanel Margin="20" Spacing="25">
-                    <!-- Timer Display with Progress Ring -->
-                    <StackPanel Spacing="15">
-                        <TextBlock Text="{Binding StatusText}" 
-                                   FontSize="24" 
-                                   HorizontalAlignment="Center"
-                                   FontWeight="Bold"
-                                   Foreground="{Binding StatusColor}"/>
-                        
-                        <Panel Width="220" Height="220" HorizontalAlignment="Center">
-                            <!-- Background Circle -->
-                            <Ellipse Stroke="{Binding StatusColor}" 
-                                     StrokeThickness="4" 
-                                     Opacity="0.2"/>
-                            
-                            <!-- Progress Ring -->
-                            <Arc Stroke="{Binding StatusColor}" 
-                                 StrokeThickness="8" 
-                                 StrokeJoin="Round"
-                                 StrokeLineCap="Round"
-                                 StartAngle="-90"
-                                 SweepAngle="{Binding ProgressSweepAngle}"
-                                 Width="220" Height="220"/>
-                            
-                            <TextBlock Text="{Binding TimeString}" 
-                                       FontSize="64" 
-                                       HorizontalAlignment="Center" 
-                                       VerticalAlignment="Center"
-                                       FontWeight="ExtraBold"
-                                       Foreground="{Binding StatusColor}"/>
-                        </Panel>
+            <DockPanel Margin="20">
+                <TextBlock Text="{Binding StatusText}" 
+                           FontSize="24" 
+                           HorizontalAlignment="Center"
+                           FontWeight="Bold"
+                           Foreground="{Binding StatusColor}"
+                           DockPanel.Dock="Top"/>
 
-                        <!-- Session Dots (Daily Progress Grouped by 4) -->
-                        <ItemsControl HorizontalAlignment="Center">
-                            <ItemsControl.ItemsSource>
-                                <MultiBinding Converter="{x:Static vm:SessionGroupsConverter.Instance}">
-                                    <Binding Path="SessionsCompletedToday"/>
-                                    <Binding Path="TargetSessions"/>
-                                </MultiBinding>
-                            </ItemsControl.ItemsSource>
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal" MaxWidth="350" HorizontalAlignment="Center"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <ItemsControl ItemsSource="{Binding}" Margin="10,5">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="6"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Ellipse Width="14" Height="14" Fill="{Binding}"/>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
+                <StackPanel Orientation="Vertical" Spacing="15" DockPanel.Dock="Bottom">
+                    <!-- Session Dots (Daily Progress Grouped by 4) -->
+                    <ItemsControl HorizontalAlignment="Center">
+                        <ItemsControl.ItemsSource>
+                            <MultiBinding Converter="{x:Static vm:SessionGroupsConverter.Instance}">
+                                <Binding Path="SessionsCompletedToday"/>
+                                <Binding Path="TargetSessions"/>
+                            </MultiBinding>
+                        </ItemsControl.ItemsSource>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ItemsControl ItemsSource="{Binding}" Margin="10,5">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="6"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Ellipse Width="14" Height="14" Fill="{Binding}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
                     <!-- Controls -->
                     <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
@@ -111,7 +85,31 @@
                                 VerticalContentAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
-            </ScrollViewer>
+
+                <Viewbox>
+                    <Panel Width="220" Height="220">
+                        <!-- Background Circle -->
+                        <Ellipse Stroke="{Binding StatusColor}" 
+                                StrokeThickness="4" 
+                                Opacity="0.2"/>
+                        
+                        <!-- Progress Ring -->
+                        <Arc Stroke="{Binding StatusColor}" 
+                            StrokeThickness="8" 
+                            StrokeJoin="Round"
+                            StrokeLineCap="Round"
+                            StartAngle="-90"
+                            SweepAngle="{Binding ProgressSweepAngle}"/>
+                        
+                        <TextBlock Text="{Binding TimeString}" 
+                                FontSize="64" 
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center"
+                                FontWeight="ExtraBold"
+                                Foreground="{Binding StatusColor}"/>
+                    </Panel>
+                </Viewbox>
+            </DockPanel>
         </TabItem>
 
         <!-- Settings Tab -->
