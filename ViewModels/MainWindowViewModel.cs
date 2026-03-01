@@ -220,16 +220,16 @@ public class ThemeTextConverter : IValueConverter
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
 }
 
-public class SessionDotsConverter : IValueConverter
+public class SessionDotsConverter : IMultiValueConverter
 {
     public static readonly SessionDotsConverter Instance = new();
 
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is int completed)
+        if (values.Count >= 2 && values[0] is int completed && values[1] is int target)
         {
             var brushes = new List<IBrush>();
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < target; i++)
             {
                 brushes.Add(i < completed ? Brush.Parse("#FF5F5F") : Brush.Parse("#80808080"));
             }
@@ -237,8 +237,6 @@ public class SessionDotsConverter : IValueConverter
         }
         return null;
     }
-
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
 }
 
 public enum TimerMode

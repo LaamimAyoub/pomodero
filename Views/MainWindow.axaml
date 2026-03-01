@@ -41,17 +41,22 @@
                            FontWeight="ExtraBold"
                            Foreground="{Binding StatusColor}"/>
 
-                <!-- Session Dots (Current Cycle) -->
-                <ItemsControl ItemsSource="{Binding SessionsInCurrentCycle, Converter={x:Static vm:SessionDotsConverter.Instance}}"
-                              HorizontalAlignment="Center">
+                <!-- Session Dots (Daily Progress) -->
+                <ItemsControl HorizontalAlignment="Center">
+                    <ItemsControl.ItemsSource>
+                        <MultiBinding Converter="{x:Static vm:SessionDotsConverter.Instance}">
+                            <Binding Path="SessionsCompletedToday"/>
+                            <Binding Path="TargetSessions"/>
+                        </MultiBinding>
+                    </ItemsControl.ItemsSource>
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="10"/>
+                            <WrapPanel Orientation="Horizontal" MaxWidth="300" HorizontalAlignment="Center"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Ellipse Width="14" Height="14" Fill="{Binding}"/>
+                            <Ellipse Width="14" Height="14" Fill="{Binding}" Margin="4"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
