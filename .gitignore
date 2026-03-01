@@ -1,0 +1,94 @@
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.doccache
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Mono auto generated files
+mono_crash.*
+
+# [Visual Studio] Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Xx]64/
+[Xx]86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Vv][Ss][Pp][Ss][Cc]Cc/
+
+# [Visual Studio] JetBrains Resharper Profiler
+*.DotStackTrace.txt
+
+# [Visual Studio] Visual Studio Code
+.vscode/
+
+# [Visual Studio] Visual Studio files
+.vs/
+
+# [Visual Studio] Roslyn cache directories
+*.ide/
+
+# [Visual Studio] Web tool cache
+.node_repl_history
+
+# [Visual Studio] NuGet Packages
+*.nupkg
+# The NuGet offline cache is still used by MSBuild even for SDK-style projects, and its default location is ~/.nuget/packages
+# If you create a solution-local packages directory, it will be found by NuGet and should be ignored
+**/packages/*
+!**/packages/build/
+
+# [Visual Studio] Entity Framework Code First Migrations
+# *.db
+# *.db-shm
+# *.db-wal
+
+# [Visual Studio] Rider
+.idea/
+*.sln.iml
+
+# [Visual Studio] Visual Studio for Mac
+.DS_Store
+
+# [Visual Studio] Mac specific
+.AppleDouble
+.LSOverride
+
+# [Visual Studio] Linux specific
+*~
+
+# [Visual Studio] Local History for Visual Studio Code
+.history/
+
+# [Visual Studio] Built symbols
+*.pdb
+*.opendb
+*.tlog
+
+# [Visual Studio] Output of dotnet publish
+[Pp]ublish/
+
+# [Visual Studio] ASP.NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# [Visual Studio] Others
+*.log
+*.sqlite
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Pomodero specific
+pomodero.db
