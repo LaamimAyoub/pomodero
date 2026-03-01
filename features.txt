@@ -1,0 +1,13 @@
+These are the core functionalities required to use the Pomodoro technique.
+
+Work Timer: A countdown timer set to 25 minutes by default.
+
+Short Break Timer: A countdown timer set to 5 minutes by default.
+
+Long Break Timer: A countdown timer set to 15-30 minutes, triggered after every four work sessions.
+
+Start/Pause/Reset Controls: Basic ability to control the flow of the session.
+
+Automatic Transition: The app should automatically switch from work to break and vice versa.
+
+Sound Alert: A subtle notification sound when a session ends.
