@@ -60,6 +60,11 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isDarkMode;
 
+    private TimeSpan _totalSessionTime;
+
+    [ObservableProperty]
+    private double _progressSweepAngle = 0;
+
     public MainWindowViewModel()
     {
         _db = new DatabaseService();
@@ -95,10 +100,24 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _remainingTime = _remainingTime.Subtract(TimeSpan.FromSeconds(1));
         UpdateTimeString();
+        UpdateProgress();
 
         if (_remainingTime.TotalSeconds <= 0)
         {
             HandleSessionEnd();
+        }
+    }
+
+    private void UpdateProgress()
+    {
+        if (_totalSessionTime.TotalSeconds > 0)
+        {
+            double progress = 1.0 - (_remainingTime.TotalSeconds / _totalSessionTime.TotalSeconds);
+            ProgressSweepAngle = progress * 360;
+        }
+        else
+        {
+            ProgressSweepAngle = 0;
         }
     }
 
@@ -107,6 +126,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _timer.Stop();
         IsRunning = false;
         StartStopButtonText = "Start";
+        ProgressSweepAngle = 360;
         PlayAlertSound();
 
         if (_currentMode == TimerMode.Work)
@@ -152,6 +172,8 @@ public partial class MainWindowViewModel : ViewModelBase
             TimerMode.LongBreak => TimeSpan.FromMinutes(LongBreakDuration),
             _ => TimeSpan.FromMinutes(WorkDuration)
         };
+        _totalSessionTime = _remainingTime;
+        ProgressSweepAngle = 0;
         UpdateTimeString();
     }
 
