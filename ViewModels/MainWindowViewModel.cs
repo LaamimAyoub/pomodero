@@ -160,7 +160,6 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         ResetTimer();
-        StartStop();
     }
 
     private void ResetTimer()
