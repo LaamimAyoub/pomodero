@@ -10,10 +10,30 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 using pomodero.Models;
 using pomodero.Services;
 
 namespace pomodero.ViewModels;
+
+public class TickViewModel : ObservableObject
+{
+    private bool _isVisible;
+    public bool IsVisible
+    {
+        get => _isVisible;
+        set => SetProperty(ref _isVisible, value);
+    }
+
+    private IBrush _color;
+    public IBrush Color
+    {
+        get => _color;
+        set => SetProperty(ref _color, value);
+    }
+
+    public double Angle { get; set; }
+}
 
 public partial class MainWindowViewModel : ViewModelBase
 {
@@ -62,8 +82,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private TimeSpan _totalSessionTime;
 
-    [ObservableProperty]
-    private double _progressSweepAngle = 0;
+    public ObservableCollection<TickViewModel> Ticks { get; } = new();
 
     public MainWindowViewModel()
     {
@@ -112,12 +131,20 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (_totalSessionTime.TotalSeconds > 0)
         {
-            double progress = 1.0 - (_remainingTime.TotalSeconds / _totalSessionTime.TotalSeconds);
-            ProgressSweepAngle = progress * 360;
+            double elapsed = _totalSessionTime.TotalSeconds - _remainingTime.TotalSeconds;
+            int ticksToShow = (int)(elapsed / _totalSessionTime.TotalSeconds * Ticks.Count);
+
+            for (int i = 0; i < Ticks.Count; i++)
+            {
+                Ticks[i].IsVisible = i < ticksToShow;
+            }
         }
         else
         {
-            ProgressSweepAngle = 0;
+            for (int i = 0; i < Ticks.Count; i++)
+            {
+                Ticks[i].IsVisible = false;
+            }
         }
     }
 
@@ -126,7 +153,10 @@ public partial class MainWindowViewModel : ViewModelBase
         _timer.Stop();
         IsRunning = false;
         StartStopButtonText = "Start";
-        ProgressSweepAngle = 360;
+        foreach (var tick in Ticks)
+        {
+            tick.IsVisible = true;
+        }
         PlayAlertSound();
 
         if (_currentMode == TimerMode.Work)
@@ -159,6 +189,11 @@ public partial class MainWindowViewModel : ViewModelBase
             StatusColor = "#FF5F5F";
         }
 
+        foreach (var tick in Ticks)
+        {
+            tick.Color = Brush.Parse(StatusColor);
+        }
+
         ResetTimer();
     }
 
@@ -172,7 +207,19 @@ public partial class MainWindowViewModel : ViewModelBase
             _ => TimeSpan.FromMinutes(WorkDuration)
         };
         _totalSessionTime = _remainingTime;
-        ProgressSweepAngle = 0;
+
+        Ticks.Clear();
+        var totalSeconds = (int)_totalSessionTime.TotalSeconds;
+        for (int i = 0; i < totalSeconds; i++)
+        {
+            Ticks.Add(new TickViewModel
+            {
+                Angle = i * (360.0 / totalSeconds),
+                Color = Brush.Parse(StatusColor),
+                IsVisible = false
+            });
+        }
+
         UpdateTimeString();
     }
 
@@ -212,6 +259,12 @@ public partial class MainWindowViewModel : ViewModelBase
         SessionsInCurrentCycle = 0;
         StatusText = "Work Session";
         StatusColor = "#FF5F5F";
+
+        foreach (var tick in Ticks)
+        {
+            tick.Color = Brush.Parse(StatusColor);
+        }
+
         ResetTimer();
     }
 

@@ -93,13 +93,23 @@
                                 StrokeThickness="4" 
                                 Opacity="0.2"/>
                         
-                        <!-- Progress Ring -->
-                        <Arc Stroke="{Binding StatusColor}" 
-                            StrokeThickness="8" 
-                            StrokeJoin="Round"
-                            StrokeLineCap="Round"
-                            StartAngle="-90"
-                            SweepAngle="{Binding ProgressSweepAngle}"/>
+                        <!-- Progress Ticks -->
+                        <ItemsControl ItemsSource="{Binding Ticks}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Rectangle Fill="{Binding Color}"
+                                               Width="4"
+                                               Height="12"
+                                               IsVisible="True">
+                                    </Rectangle>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         
                         <TextBlock Text="{Binding TimeString}" 
                                 FontSize="64" 
