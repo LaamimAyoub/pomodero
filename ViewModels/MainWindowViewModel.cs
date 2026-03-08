@@ -11,6 +11,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Reflection; // Added for Assembly
 using pomodero.Models;
 using pomodero.Services;
 
@@ -80,6 +81,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isDarkMode;
 
+    [ObservableProperty]
+    private string _appVersion; // New property for application version
+
     private TimeSpan _totalSessionTime;
 
     public ObservableCollection<TickViewModel> Ticks { get; } = new();
@@ -97,6 +101,9 @@ public partial class MainWindowViewModel : ViewModelBase
         _targetSessions = _settings.TargetSessions;
         _isDarkMode = _settings.IsDarkMode;
         _sessionsCompletedToday = _todayRecord.CompletedSessions;
+
+        // Get application version
+        _appVersion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "N/A";
 
         // Apply theme on start
         Dispatcher.UIThread.Post(() => {

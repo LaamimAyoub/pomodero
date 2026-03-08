@@ -24,154 +24,169 @@
         <Rectangle Fill="{DynamicResource SystemControlBackgroundAltHighBrush}" 
                    Opacity="0.5"/>
 
-        <TabControl Margin="10">
-            <!-- Timer Tab -->
-            <TabItem Header="Timer" FontSize="16">
-            <DockPanel Margin="20">
-                <TextBlock Text="{Binding StatusText}" 
-                           FontSize="24" 
-                           HorizontalAlignment="Center"
-                           FontWeight="Bold"
-                           Foreground="{Binding StatusColor}"
-                           DockPanel.Dock="Top"/>
+        <DockPanel>
+            <!-- Footer -->
+            <Border DockPanel.Dock="Bottom" 
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                    Padding="5" 
+                    BorderThickness="0,1,0,0" 
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}">
+                <TextBlock Text="{Binding AppVersion, StringFormat='Version: {0}'}" 
+                           HorizontalAlignment="Right" 
+                           VerticalAlignment="Center" 
+                           FontSize="10" 
+                           Margin="5,0"/>
+            </Border>
 
-                <StackPanel Orientation="Vertical" Spacing="15" DockPanel.Dock="Bottom">
-                    <!-- Session Dots (Daily Progress Grouped by 4) -->
-                    <ItemsControl HorizontalAlignment="Center">
-                        <ItemsControl.ItemsSource>
-                            <MultiBinding Converter="{x:Static vm:SessionGroupsConverter.Instance}">
-                                <Binding Path="SessionsCompletedToday"/>
-                                <Binding Path="TargetSessions"/>
-                            </MultiBinding>
-                        </ItemsControl.ItemsSource>
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ItemsControl ItemsSource="{Binding}" Margin="10,5">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" Spacing="6"/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Ellipse Width="14" Height="14" Fill="{Binding}"/>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+            <TabControl Margin="10">
+                <!-- Timer Tab -->
+                <TabItem Header="Timer" FontSize="16">
+                <DockPanel Margin="20">
+                    <TextBlock Text="{Binding StatusText}" 
+                               FontSize="24" 
+                               HorizontalAlignment="Center"
+                               FontWeight="Bold"
+                               Foreground="{Binding StatusColor}"
+                               DockPanel.Dock="Top"/>
 
-                    <!-- Controls -->
-                    <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
-                        <Button Content="{Binding StartStopButtonText}" 
-                                Command="{Binding StartStopCommand}"
-                                Width="130" Height="50"
-                                FontSize="20"
-                                HorizontalContentAlignment="Center"
-                                VerticalContentAlignment="Center"
-                                Classes="accent"/>
-                        
-                        <Button Content="Reset" 
-                                Command="{Binding ResetCommand}"
-                                Width="130" Height="50"
-                                FontSize="20"
-                                HorizontalContentAlignment="Center"
-                                VerticalContentAlignment="Center"/>
-                    </StackPanel>
-                </StackPanel>
-
-                <Viewbox>
-                    <Panel Width="220" Height="220">
-                        <!-- Background Circle -->
-                        <Ellipse Stroke="{Binding StatusColor}" 
-                                StrokeThickness="4" 
-                                Opacity="0.2"/>
-                        
-                        <!-- Progress Ticks -->
-                        <ItemsControl ItemsSource="{Binding Ticks}">
+                    <StackPanel Orientation="Vertical" Spacing="15" DockPanel.Dock="Bottom">
+                        <!-- Session Dots (Daily Progress Grouped by 4) -->
+                        <ItemsControl HorizontalAlignment="Center">
+                            <ItemsControl.ItemsSource>
+                                <MultiBinding Converter="{x:Static vm:SessionGroupsConverter.Instance}">
+                                    <Binding Path="SessionsCompletedToday"/>
+                                    <Binding Path="TargetSessions"/>
+                                </MultiBinding>
+                            </ItemsControl.ItemsSource>
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <Canvas/>
+                                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Rectangle Fill="{Binding Color}"
-                                               Width="4"
-                                               Height="12"
-                                               IsVisible="True">
-                                    </Rectangle>
+                                    <ItemsControl ItemsSource="{Binding}" Margin="10,5">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="6"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Ellipse Width="14" Height="14" Fill="{Binding}"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        
-                        <TextBlock Text="{Binding TimeString}" 
-                                FontSize="64" 
-                                HorizontalAlignment="Center" 
-                                VerticalAlignment="Center"
-                                FontWeight="ExtraBold"
-                                Foreground="{Binding StatusColor}"/>
-                    </Panel>
-                </Viewbox>
-            </DockPanel>
-        </TabItem>
 
-        <!-- Settings Tab -->
-        <TabItem Header="Settings" FontSize="16">
-            <ScrollViewer>
-                <StackPanel Margin="20" Spacing="25">
-                    <!-- Theme Toggle -->
-                    <DockPanel>
-                        <TextBlock Text="Appearance" VerticalAlignment="Center" FontSize="18" FontWeight="SemiBold"/>
-                        <Button Command="{Binding ToggleThemeCommand}" 
-                                Content="{Binding IsDarkMode, Converter={x:Static vm:ThemeTextConverter.Instance}}"
-                                DockPanel.Dock="Right" 
-                                HorizontalAlignment="Right"
-                                Padding="12,6"/>
-                    </DockPanel>
-
-                    <Separator Height="2"/>
-
-                    <!-- Statistics -->
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="Statistics" FontSize="18" FontWeight="Bold"/>
-                        <TextBlock FontSize="16">
-                            <Run Text="Sessions Today: " FontWeight="SemiBold"/>
-                            <Run Text="{Binding SessionsCompletedToday}"/>
-                            <Run Text=" / "/>
-                            <Run Text="{Binding TargetSessions}"/>
-                        </TextBlock>
+                        <!-- Controls -->
+                        <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
+                            <Button Content="{Binding StartStopButtonText}" 
+                                    Command="{Binding StartStopCommand}"
+                                    Width="130" Height="50"
+                                    FontSize="20"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Classes="accent"/>
+                            
+                            <Button Content="Reset" 
+                                    Command="{Binding ResetCommand}"
+                                    Width="130" Height="50"
+                                    FontSize="20"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"/>
+                        </StackPanel>
                     </StackPanel>
 
-                    <Separator Height="2"/>
+                    <Viewbox>
+                        <Panel Width="220" Height="220">
+                            <!-- Background Circle -->
+                            <Ellipse Stroke="{Binding StatusColor}" 
+                                    StrokeThickness="4" 
+                                    Opacity="0.2"/>
+                            
+                            <!-- Progress Ticks -->
+                            <ItemsControl ItemsSource="{Binding Ticks}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Rectangle Fill="{Binding Color}"
+                                                   Width="4"
+                                                   Height="12"
+                                                   IsVisible="True">
+                                        </Rectangle>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            
+                            <TextBlock Text="{Binding TimeString}" 
+                                    FontSize="64" 
+                                    HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center"
+                                    FontWeight="ExtraBold"
+                                    Foreground="{Binding StatusColor}"/>
+                        </Panel>
+                    </Viewbox>
+                </DockPanel>
+            </TabItem>
 
-                    <!-- Timer Settings -->
-                    <StackPanel Spacing="15">
-                        <TextBlock Text="Durations (minutes)" FontSize="18" FontWeight="Bold"/>
-                        
-                        <Grid ColumnDefinitions="*,120" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,5">
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Work" VerticalAlignment="Center"/>
-                            <NumericUpDown Grid.Row="0" Grid.Column="1" Value="{Binding WorkDuration}" Minimum="1" Maximum="60" Margin="0,4"/>
+            <!-- Settings Tab -->
+            <TabItem Header="Settings" FontSize="16">
+                <ScrollViewer>
+                    <StackPanel Margin="20" Spacing="25">
+                        <!-- Theme Toggle -->
+                        <DockPanel>
+                            <TextBlock Text="Appearance" VerticalAlignment="Center" FontSize="18" FontWeight="SemiBold"/>
+                            <Button Command="{Binding ToggleThemeCommand}" 
+                                    Content="{Binding IsDarkMode, Converter={x:Static vm:ThemeTextConverter.Instance}}"
+                                    DockPanel.Dock="Right" 
+                                    HorizontalAlignment="Right"
+                                    Padding="12,6"/>
+                        </DockPanel>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Short Break" VerticalAlignment="Center"/>
-                            <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding ShortBreakDuration}" Minimum="1" Maximum="30" Margin="0,4"/>
+                        <Separator Height="2"/>
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Long Break" VerticalAlignment="Center"/>
-                            <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding LongBreakDuration}" Minimum="1" Maximum="60" Margin="0,4"/>
+                        <!-- Statistics -->
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Statistics" FontSize="18" FontWeight="Bold"/>
+                            <TextBlock FontSize="16">
+                                <Run Text="Sessions Today: " FontWeight="SemiBold"/>
+                                <Run Text="{Binding SessionsCompletedToday}"/>
+                                <Run Text=" / "/>
+                                <Run Text="{Binding TargetSessions}"/>
+                            </TextBlock>
+                        </StackPanel>
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Daily Target" VerticalAlignment="Center"/>
-                            <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding TargetSessions}" Minimum="1" Maximum="50" Margin="0,4"/>
-                        </Grid>
+                        <Separator Height="2"/>
+
+                        <!-- Timer Settings -->
+                        <StackPanel Spacing="15">
+                            <TextBlock Text="Durations (minutes)" FontSize="18" FontWeight="Bold"/>
+                            
+                            <Grid ColumnDefinitions="*,120" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,5">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Work" VerticalAlignment="Center"/>
+                                <NumericUpDown Grid.Row="0" Grid.Column="1" Value="{Binding WorkDuration}" Minimum="1" Maximum="60" Margin="0,4"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Short Break" VerticalAlignment="Center"/>
+                                <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding ShortBreakDuration}" Minimum="1" Maximum="30" Margin="0,4"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Long Break" VerticalAlignment="Center"/>
+                                <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding LongBreakDuration}" Minimum="1" Maximum="60" Margin="0,4"/>
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Daily Target" VerticalAlignment="Center"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding TargetSessions}" Minimum="1" Maximum="50" Margin="0,4"/>
+                            </Grid>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
-            </ScrollViewer>
-        </TabItem>
-    </TabControl>
-</Panel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+        </DockPanel>
+    </Panel>
 </Window>
