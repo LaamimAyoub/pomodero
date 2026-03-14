@@ -82,18 +82,23 @@
                         </ItemsControl>
 
                         <!-- Controls -->
-                        <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
                             <Button Content="{Binding StartStopButtonText}" 
                                     Command="{Binding StartStopCommand}"
-                                    Width="130" Height="50"
+                                    Width="100" Height="50"
                                     FontSize="20"
                                     HorizontalContentAlignment="Center"
                                     VerticalContentAlignment="Center"
                                     Classes="accent"/>
-                            
+                            <Button Content="Skip"
+                                    Command="{Binding SkipCommand}"
+                                    Width="90" Height="50"
+                                    FontSize="20"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"/>
                             <Button Content="Reset" 
                                     Command="{Binding ResetCommand}"
-                                    Width="130" Height="50"
+                                    Width="90" Height="50"
                                     FontSize="20"
                                     HorizontalContentAlignment="Center"
                                     VerticalContentAlignment="Center"/>

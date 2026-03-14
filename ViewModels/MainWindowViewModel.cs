@@ -26,7 +26,7 @@ public class TickViewModel : ObservableObject
         set => SetProperty(ref _isVisible, value);
     }
 
-    private IBrush _color;
+    private IBrush _color = Brushes.Black;
     public IBrush Color
     {
         get => _color;
@@ -181,12 +181,14 @@ public partial class MainWindowViewModel : ViewModelBase
                 StatusText = "Long Break";
                 StatusColor = "#5F5FFF";
                 SessionsInCurrentCycle = 0;
+                SendNotification("Pomodoro", "Work session finished! Time for a long break.");
             }
             else
             {
                 _currentMode = TimerMode.ShortBreak;
                 StatusText = "Short Break";
                 StatusColor = "#5FFF5F";
+                SendNotification("Pomodoro", "Work session finished! Time for a short break.");
             }
         }
         else
@@ -194,6 +196,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _currentMode = TimerMode.Work;
             StatusText = "Work Session";
             StatusColor = "#FF5F5F";
+            SendNotification("Pomodoro", "Break finished! Time for a work session.");
         }
 
         foreach (var tick in Ticks)
@@ -276,6 +279,46 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void Skip()
+    {
+        _timer.Stop();
+        IsRunning = false;
+        StartStopButtonText = "Start";
+
+        if (_currentMode == TimerMode.Work)
+        {
+            SessionsInCurrentCycle++; // Increment cycle counter
+            // Don't increment completed sessions when skipping
+            if (SessionsInCurrentCycle >= 4)
+            {
+                _currentMode = TimerMode.LongBreak;
+                StatusText = "Long Break";
+                StatusColor = "#5F5FFF";
+                SessionsInCurrentCycle = 0;
+            }
+            else
+            {
+                _currentMode = TimerMode.ShortBreak;
+                StatusText = "Short Break";
+                StatusColor = "#5FFF5F";
+            }
+        }
+        else
+        {
+            _currentMode = TimerMode.Work;
+            StatusText = "Work Session";
+            StatusColor = "#FF5F5F";
+        }
+
+        foreach (var tick in Ticks)
+        {
+            tick.Color = Brush.Parse(StatusColor);
+        }
+
+        ResetTimer();
+    }
+
+    [RelayCommand]
     private void ToggleTheme()
     {
         IsDarkMode = !IsDarkMode;
@@ -339,6 +382,18 @@ public partial class MainWindowViewModel : ViewModelBase
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Console.Beep();
+            }
+        }
+        catch { }
+    }
+
+    private void SendNotification(string title, string message)
+    {
+        try
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Process.Start("notify-send", new string[]{title, message});
             }
         }
         catch { }
